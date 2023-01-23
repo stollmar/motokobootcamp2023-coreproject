@@ -1,0 +1,88 @@
+type Vote = 
+ record {
+   "principal": principal;
+   v_power: float64;
+   v_type: bool;
+ };
+type Self = 
+ service {
+   create_neuron: (principal, int, int) -> (variant {
+                                              Err: text;
+                                              Ok: Neuron;
+                                            });
+   delete_newron: (principal) -> ();
+   dissolve_neuron: (principal) -> (variant {
+                                      Err: text;
+                                      Ok: Neuron;
+                                    });
+   getPrincipal: () -> (text);
+   get_all_neurons: () -> (vec record {
+                                 principal;
+                                 Neuron;
+                               }) query;
+   get_all_proposals: () -> (vec record {
+                                   nat;
+                                   Proposal;
+                                 }) query;
+   get_neuron: (principal) -> (variant {
+                                 Err: text;
+                                 Ok: Neuron;
+                               }) query;
+   get_proposal: (nat) -> (opt Proposal) query;
+   get_votes: (nat) -> (opt vec Vote);
+   get_voting_power: (principal) ->
+    (record {
+       age: float64;
+       dissolve_delay: float64;
+       token_num: float64;
+       vote_power: float64;
+     }) query;
+   submit_proposal: (Proposal) -> (variant {
+                                     Err: text;
+                                     Ok: Proposal;
+                                   });
+   update_neuron: (principal, Neuron) -> (Neuron);
+   vote: (principal, nat, bool) ->
+    (variant {
+       Err: text;
+       Ok: record {
+             float64;
+             float64;
+           };
+     });
+ };
+type Proposal = 
+ record {
+   endTime: int;
+   name: text;
+   startTime: int;
+   state: bool;
+   vote: record {
+           accept: float64;
+           reject: float64;
+         };
+ };
+type NeuronStatus = 
+ variant {
+   Dissolved: record {
+                dissolve_delay: int;
+                time: int;
+              };
+   Dissolving: record {
+                 dissolve_delay: int;
+                 time: int;
+               };
+   Locked: record {
+             dissolve_delay: int;
+             time: int;
+           };
+ };
+type Neuron = 
+ record {
+   createTime: int;
+   dissolve_delay: int;
+   id: nat;
+   status: NeuronStatus;
+   token_staking: int;
+ };
+service : () -> Self
